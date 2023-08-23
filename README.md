@@ -8,10 +8,10 @@ A simple server to easily send notifications via a RESTful API and receive them 
 -> `{"status": 200 "message":"<token>"}`
 
 ### Send a message:
-`curl mailtify.domain.com/msg?token=<token> -F "title=my title" -F "message=my message" -F "recipients=my@mailaddr.com"`
+`curl "mailtify.domain.com/msg?token=<token>" -F "title=my title" -F "message=my message" -F "recipients=my@mailaddr.com"`
 
 ### Delete a token:
-`curl mailtify.domain.com/del?token=<token>`
+`curl "mailtify.domain.com/del?token=<token>"`
 
 # Which features comes next?
 1. User accounts
