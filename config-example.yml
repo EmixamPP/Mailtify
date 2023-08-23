@@ -1,0 +1,23 @@
+server:
+  listenaddr: "" # the address to bind on, leave empty to bind on all addresses
+  port: 80 # the port for the http server
+  alloworigins:
+    - "*"
+    # - "http://example.com"
+    # - "https://example.com"
+
+database:
+  dialect: sqlite3 # other possibilities: mysql, postgres
+  connection: mailtify.db
+  # if mysql: mailtify:secret@/mailtifydb?charset=utf8&parseTime=True&loc=Local
+  # if postgres: host=localhost port=3306 user=mailtify dbname=mailtify password=secret
+
+smtp:
+  username:
+  password:
+  host:
+  port:
+  from:
+
+security:
+  tokensize: 16 # max 128, higher is better, but less keyboard-friendly
