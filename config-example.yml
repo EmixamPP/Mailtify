@@ -2,9 +2,15 @@ server:
   listenaddr: "" # the address to bind on, leave empty to bind on all addresses
   port: 80 # the port for the http server
   alloworigins:
-    - "*"
+    - "*" # allow all
     # - "http://example.com"
     # - "https://example.com"
+  ssl:
+    enabled: false # if https should be enabled
+    redirecttohttps: true # redirect http to https
+    port: 443 # the https port
+    certfile: # the cert file path
+    certkey: # the cert key path
 
 database:
   dialect: sqlite3 # other possibilities: mysql, postgres
@@ -13,11 +19,11 @@ database:
   # if postgres: host=localhost port=3306 user=mailtify dbname=mailtify password=secret
 
 smtp:
-  username:
-  password:
-  host:
-  port:
-  from:
+  username: # account to connect the smtp server 
+  password: # 
+  host: # the smtp server
+  port: # port of the smtp server
+  from: # mail adress which will send the messages
 
 security:
   tokensize: 16 # max 128, higher is better, but less keyboard-friendly

@@ -13,7 +13,7 @@ const DATABASE_ERROR_MESSAGE = "internal error"
 
 // New creates a GormDB.
 // It returns nil and an error if a problem occurs.
-func New(dialect, connection string, tokenSize int) (*GormDB, error) {
+func New(dialect, connection string, tokenSize uint8) (*GormDB, error) {
 	db, err := gorm.Open(dialect, connection)
 	if err != nil {
 		return nil, err
@@ -29,7 +29,7 @@ func New(dialect, connection string, tokenSize int) (*GormDB, error) {
 // GormDB is a wrapper for the gorm framework and other needed parameters.
 type GormDB struct {
 	DB        *gorm.DB
-	TokenSize int
+	TokenSize uint8
 }
 
 // Close closes the database connection.

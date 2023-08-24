@@ -3,7 +3,7 @@ package config
 import (
 	"os"
 
-	"gopkg.in/validator.v2"
+	"github.com/go-playground/validator/v10"
 	"gopkg.in/yaml.v3"
 )
 
@@ -13,25 +13,33 @@ const CONFIG_PATH = "./config.yml"
 type Configuration struct {
 	Server struct {
 		ListenAddr   string
-		Port         string `validate:"nonzero"`
-		AllowOrigins []string
+		Port         string   `validate:"required"`
+		AllowOrigins []string 
+
+		SSL struct {
+			Enabled         bool
+			RedirectToHttps bool  
+			Port            string `validate:"required_if=Enabled true"`
+			CertFile        string `validate:"required_if=Enabled true"`
+			CertKey         string `validate:"required_if=Enabled true"`
+		}
 	}
 
 	Database struct {
-		Dialect    string `validate:"nonzero"`
-		Connection string `validate:"nonzero"`
+		Dialect    string `validate:"required"`
+		Connection string `validate:"required"`
 	}
 
 	SMTP struct {
-		Username string `validate:"nonzero"`
-		Password string `validate:"nonzero"`
-		Host     string `validate:"nonzero"`
-		Port     string `validate:"nonzero"`
-		From     string `validate:"nonzero"`
+		Username string `validate:"required"`
+		Password string `validate:"required"`
+		Host     string `validate:"required,fqdn"`
+		Port     string `validate:"required"`
+		From     string `validate:"required,email"`
 	}
 
 	Security struct {
-		TokenSize int `validate:"nonzero"`
+		TokenSize uint8 `validate:"required,gte=12"`
 	}
 }
 
@@ -47,7 +55,7 @@ func Get() *Configuration {
 		panic(err)
 	}
 
-	if err = validator.Validate(config); err != nil {
+	if err = validator.New().Struct(config); err != nil {
 		panic(err)
 	}
 

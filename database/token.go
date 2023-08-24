@@ -12,7 +12,7 @@ const TOKEN_CHARSET = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234
 
 // generateToken returns a new random token of tokenSize alphenumeric character.
 // nil and an error are returned if a problem has occurred.
-func generateToken(tokenSize int) (*model.Token, error) {
+func generateToken(tokenSize uint8) (*model.Token, error) {
 	token := make([]byte, tokenSize)
 
 	// generate a token of random byte
@@ -22,7 +22,7 @@ func generateToken(tokenSize int) (*model.Token, error) {
 	}
 
 	// translate into alphenumeric
-	for i := 0; i < tokenSize; i++ {
+	for i := uint8(0); i < tokenSize; i++ {
 		token[i] = TOKEN_CHARSET[token[i]%byte(len(TOKEN_CHARSET))]
 	}
 
