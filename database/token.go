@@ -62,3 +62,9 @@ func (d *GormDB) IsTokenExists(token *model.Token) (bool, error) {
 	}
 	return true, nil
 }
+
+func (d *GormDB) GetTokens() ([]model.Token, error) {
+	var tokens []model.Token
+	err := d.DB.Find(&tokens).Error
+	return tokens, err
+}

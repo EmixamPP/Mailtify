@@ -13,27 +13,19 @@ const CONFIG_PATH = "./config.yml"
 type Configuration struct {
 	Server struct {
 		ListenAddr   string
-		Port         string   `validate:"required"`
-		AllowOrigins []string 
-
-		SSL struct {
-			Enabled         bool
-			RedirectToHttps bool  
-			Port            string `validate:"required_if=Enabled true"`
-			CertFile        string `validate:"required_if=Enabled true"`
-			CertKey         string `validate:"required_if=Enabled true"`
-		}
+		Port         string `validate:"required"`
+		AllowOrigins []string
 	}
 
 	Database struct {
-		Dialect    string `validate:"required"`
+		Dialect    string `validate:"required,oneof=sqlite3 mysql postgres"`
 		Connection string `validate:"required"`
 	}
 
 	SMTP struct {
 		Username string `validate:"required"`
 		Password string `validate:"required"`
-		Host     string `validate:"required,fqdn"`
+		Host     string `validate:"required"`
 		Port     string `validate:"required"`
 		From     string `validate:"required,email"`
 	}

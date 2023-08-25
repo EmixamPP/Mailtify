@@ -5,6 +5,7 @@ import (
 	"mailtify/database"
 	"mailtify/message"
 	"mailtify/router"
+	"mailtify/runner"
 )
 
 func main() {
@@ -18,8 +19,11 @@ func main() {
 
 	m := message.Create(c.SMTP.From, c.SMTP.Username, c.SMTP.Password, c.SMTP.Host, c.SMTP.Port)
 
-	err = router.Create(c.Server.ListenAddr, c.Server.Port, c.Server.AllowOrigins, d, m)
+	r := router.Create(d, m)
+	
+	err = runner.Run(r, c)
 	if err != nil {
 		panic(err)
 	}
+	
 }

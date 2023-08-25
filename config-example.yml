@@ -5,12 +5,6 @@ server:
     - "*" # allow all
     # - "http://example.com"
     # - "https://example.com"
-  ssl:
-    enabled: false # if https should be enabled
-    redirecttohttps: true # redirect http to https
-    port: 443 # the https port
-    certfile: # the cert file path
-    certkey: # the cert key path
 
 database:
   dialect: sqlite3 # other possibilities: mysql, postgres
