@@ -1,27 +1,27 @@
 package main
 
 import (
-	"mailtify/config"
+	"mailtify/configuration"
 	"mailtify/database"
 	"mailtify/message"
-	"mailtify/router"
+	"mailtify/api"
 	"mailtify/runner"
 )
 
 func main() {
-	c := config.Get()
+	config := configuration.Get()
 
-	d, err := database.New(c.Database.Dialect, c.Database.Connection, c.Security.TokenSize)
+	db, err := database.New(config.Database.Dialect, config.Database.Connection, config.Security.TokenSize)
 	if err != nil {
 		panic(err)
 	}
-	defer d.Close()
+	defer db.Close()
 
-	m := message.Create(c.SMTP.From, c.SMTP.Username, c.SMTP.Password, c.SMTP.Host, c.SMTP.Port)
+	messenger := message.Create(config.SMTP.From, config.SMTP.Username, config.SMTP.Password, config.SMTP.Host, config.SMTP.Port)
 
-	r := router.Create(d, m)
+	router := api.Create(db, messenger)
 	
-	err = runner.Run(r, c)
+	err = runner.Run(router, config)
 	if err != nil {
 		panic(err)
 	}
