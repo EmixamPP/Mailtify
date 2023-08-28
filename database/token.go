@@ -29,42 +29,57 @@ func generateToken(tokenSize uint8) (*model.Token, error) {
 	return &model.Token{Value: string(token)}, nil
 }
 
-// NewToken creates an unique token in the storage and returns it.
+// NewToken creates an unique token in the database and returns it.
 // nil and an error are returned if a problem has occurred.
-func (d *GormDB) NewToken() (*model.Token, error) {
+func (d *GormDB) NewToken(createdBy *model.User) (*model.Token, error) {
 	token, err := generateToken(d.TokenSize)
 	if err != nil {
 		return nil, err
 	}
 
-	err = d.DB.Create(token).Error
+	token.UserID = createdBy.ID
+	token.CreatedBy = *createdBy
+
+	err = d.db.Create(token).Error
 	if err != nil {
 		return nil, err
 	}
 
+	createdBy.Tokens = append(createdBy.Tokens, *token)
+
 	return token, nil
 }
 
-// DelToken deletes a token in the storage.
+// SaveToken update a token of the database.
+// An error are returned if a problem has occurred.
+func (d *GormDB) UpdateToken(token *model.Token) error {
+	return d.db.Save(token).Error
+}
+
+// DelToken deletes a token from the database.
 // An error is returned if a problem has occurred.
 func (d *GormDB) DelToken(token *model.Token) error {
-	return d.DB.Delete(token).Error
+	return d.db.Delete(token).Error
 }
 
-// IsTokenExists checks if a token is the storage, returns true if so, otherwise false.
-// False and an error is returned if a problem has occurred.
-func (d *GormDB) IsTokenExists(token *model.Token) (bool, error) {
-	if err := d.DB.Where("value = ?", token.Value).First(&model.Token{}).Error; err != nil {
+// GetToken checks if a token is in the database,
+// returns the token model if so, otherwise nil.
+// nil and an error is returned if a problem has occurred.
+func (d *GormDB) GetToken(value string) (*model.Token, error) {
+	var token model.Token
+	if err := d.db.Where("value = ?", value).First(&token).Error; err != nil {
 		if gorm.IsRecordNotFoundError(err) {
-			return false, nil
+			return nil, nil
 		}
-		return false, err
+		return nil, err
 	}
-	return true, nil
+	return &token, nil
 }
 
+// GetTokens returns all tokens in the dartabase.
+// An empty list and an error are returned if a problem has occured.
 func (d *GormDB) GetTokens() ([]model.Token, error) {
 	var tokens []model.Token
-	err := d.DB.Find(&tokens).Error
+	err := d.db.Find(&tokens).Error
 	return tokens, err
 }

@@ -19,20 +19,20 @@ func New(dialect, connection string, tokenSize uint8) (*GormDB, error) {
 		return nil, err
 	}
 
-	if err := db.AutoMigrate(new(model.Token)).Error; err != nil {
+	if err := db.AutoMigrate(new(model.Token), new(model.Token)).Error; err != nil {
 		return nil, err
 	}
 
-	return &GormDB{DB: db, TokenSize: tokenSize}, nil
+	return &GormDB{db: db, TokenSize: tokenSize}, nil
 }
 
 // GormDB is a wrapper for the gorm framework and other needed parameters.
 type GormDB struct {
-	DB        *gorm.DB
+	db        *gorm.DB
 	TokenSize uint8
 }
 
 // Close closes the database connection.
 func (d *GormDB) Close() {
-	d.DB.Close()
+	d.db.Close()
 }
