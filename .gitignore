@@ -19,3 +19,4 @@ go.work
 
 # User workspace file
 config.yml
+mailtify.db

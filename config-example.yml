@@ -12,9 +12,13 @@ database:
   # if mysql: mailtify:secret@/mailtifydb?charset=utf8&parseTime=True&loc=Local
   # if postgres: host=localhost port=3306 user=mailtify dbname=mailtify password=secret
 
+defaultadmin: # if no admin exists in the database, the default admin is created
+  username: # account of the default admin
+  password: #
+
 smtp:
-  username: # account to connect the smtp server 
-  password: # 
+  username: # account to connect the smtp server
+  password: #
   host: # the smtp server
   port: # port of the smtp server
   from: # mail adress which will send the messages

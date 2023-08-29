@@ -38,9 +38,9 @@ func (d *GormDB) NewToken(createdBy *model.User) (*model.Token, error) {
 	}
 
 	token.UserID = createdBy.ID
-	token.CreatedBy = *createdBy
+	token.User = *createdBy
 
-	err = d.db.Create(token).Error
+	err = d.db.Create(&token).Error
 	if err != nil {
 		return nil, err
 	}
@@ -53,13 +53,13 @@ func (d *GormDB) NewToken(createdBy *model.User) (*model.Token, error) {
 // SaveToken update a token of the database.
 // An error are returned if a problem has occurred.
 func (d *GormDB) UpdateToken(token *model.Token) error {
-	return d.db.Save(token).Error
+	return d.db.Save(&token).Error
 }
 
 // DelToken deletes a token from the database.
 // An error is returned if a problem has occurred.
 func (d *GormDB) DelToken(token *model.Token) error {
-	return d.db.Delete(token).Error
+	return d.db.Delete(&token).Error
 }
 
 // GetToken checks if a token is in the database,
@@ -67,7 +67,7 @@ func (d *GormDB) DelToken(token *model.Token) error {
 // nil and an error is returned if a problem has occurred.
 func (d *GormDB) GetToken(value string) (*model.Token, error) {
 	var token model.Token
-	if err := d.db.Where("value = ?", value).First(&token).Error; err != nil {
+	if err := d.db.Model(&token).Where("value = ?", value).First(&token).Error; err != nil {
 		if gorm.IsRecordNotFoundError(err) {
 			return nil, nil
 		}
@@ -80,6 +80,6 @@ func (d *GormDB) GetToken(value string) (*model.Token, error) {
 // An empty list and an error are returned if a problem has occured.
 func (d *GormDB) GetTokens() ([]model.Token, error) {
 	var tokens []model.Token
-	err := d.db.Find(&tokens).Error
+	err := d.db.Preload("User").Find(&tokens).Error
 	return tokens, err
 }

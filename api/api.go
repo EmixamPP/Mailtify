@@ -58,7 +58,7 @@ func messageHandler(c *gin.Context, d *database.GormDB, m *message.Messenger) Re
 
 // newHandler allows to create a token.
 // It requieres a valid user in the context, and responses a new token.
-func newHandler(c *gin.Context, d *database.GormDB, _ *message.Messenger) Response {
+func newHandler(c *gin.Context, d *database.GormDB) Response {
 	userInterface, ok := c.Get("user")
 	if !ok {
 		panic("user missing from the gin context")
@@ -75,7 +75,7 @@ func newHandler(c *gin.Context, d *database.GormDB, _ *message.Messenger) Respon
 
 // deleteHandler allows to delete a token.
 // It requieres a valid token in the context.
-func deleteHandler(c *gin.Context, d *database.GormDB, _ *message.Messenger) Response {
+func deleteHandler(c *gin.Context, d *database.GormDB) Response {
 	tokenInterface, ok := c.Get("token")
 	if !ok {
 		panic("token missing from the gin context")
@@ -91,7 +91,7 @@ func deleteHandler(c *gin.Context, d *database.GormDB, _ *message.Messenger) Res
 }
 
 // tokensHandler responses all the tokens in the database.
-func tokensHandler(c *gin.Context, d *database.GormDB, _ *message.Messenger) Response {
+func tokensHandler(c *gin.Context, d *database.GormDB) Response {
 	tokens, err := d.GetTokens()
 	if err != nil {
 		return Response{Status: http.StatusInternalServerError, Message: err.Error()}

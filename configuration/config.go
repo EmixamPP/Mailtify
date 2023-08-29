@@ -22,6 +22,11 @@ type Configuration struct {
 		Connection string `validate:"required"`
 	}
 
+	DefaultAdmin struct {
+		Username string `validate:"required"`
+		Password string `validate:"required"`
+	}
+
 	SMTP struct {
 		Username string `validate:"required"`
 		Password string `validate:"required"`
