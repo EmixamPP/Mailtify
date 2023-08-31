@@ -37,15 +37,13 @@ func (d *GormDB) NewToken(createdBy *model.User) (*model.Token, error) {
 		return nil, err
 	}
 
-	token.UserID = createdBy.ID
-	token.User = *createdBy
+	token.CreatedByID = createdBy.ID
+	token.CreatedBy = *createdBy
 
 	err = d.db.Create(&token).Error
 	if err != nil {
 		return nil, err
 	}
-
-	createdBy.Tokens = append(createdBy.Tokens, *token)
 
 	return token, nil
 }
@@ -76,10 +74,10 @@ func (d *GormDB) GetToken(value string) (*model.Token, error) {
 	return &token, nil
 }
 
-// GetTokens returns all tokens in the dartabase.
+// GetUserTokens returns all tokens of an user in the dartabase.
 // An empty list and an error are returned if a problem has occured.
-func (d *GormDB) GetTokens() ([]model.Token, error) {
+func (d *GormDB) GetUserTokens(user *model.User) ([]model.Token, error) {
 	var tokens []model.Token
-	err := d.db.Preload("User").Find(&tokens).Error
+	err := d.db.Where("created_by_id = ?", user.ID).Find(&tokens).Error
 	return tokens, err
 }

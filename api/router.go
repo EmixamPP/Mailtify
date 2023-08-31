@@ -38,27 +38,33 @@ func Create(d *database.GormDB, m *message.Messenger) *gin.Engine {
 	router := gin.Default()
 	router.Use(parseMultipartForm())
 
-	router.Match([]string{"POST", "PUT"}, "/msg", authenticateToken(d),
+	router.Match([]string{"POST", "PUT"}, "/msg/:token", authenticateToken(d),
 		routeMessenger(messageHandler))
-	router.Match([]string{"POST", "PUT"}, "/message", authenticateToken(d),
+	router.Match([]string{"POST", "PUT"}, "/message/:token", authenticateToken(d),
 		routeMessenger(messageHandler))
 
 	router.GET("/new", authenticateUser(d), route(newHandler))
 
-	router.DELETE("/delete", authenticateUser(d), authenticateToken(d),
-		tokenOwnerOrAdmin(), route(deleteHandler))
+	router.PUT("/create", authenticateUser(d), admin(), route(createUserHandler))
 
-	router.GET("/tokens", authenticateUser(d), admin(), route(tokensHandler))
+	router.GET("/tokens", authenticateUser(d), route(tokensHandler))
+
+	router.GET("/users", authenticateUser(d), admin(), route(usersHandler))
+
+	router.DELETE("/token/:token", authenticateUser(d), authenticateToken(d),
+		tokenOwner(), route(deleteTokenHandler))
+
+	router.DELETE("/user/:username", authenticateUser(d), admin(), authenticateUsername(d),
+		route(deleteUserHandler))
 
 	return router
 }
 
 // authenticate stores the token in the context for unified access from the API.
-// Abord if the token is invalid, i.e. is not in the database,
-// or if the token is missing.
+// Abord if the token is invalid, i.e. is not in the database.
 func authenticateToken(d *database.GormDB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		value := c.Query("token")
+		value := c.Param("token")
 
 		if value == "" {
 			res := Response{Status: http.StatusBadRequest, Message: BAD_REQUEST_MESSAGE}
@@ -85,7 +91,7 @@ func authenticateToken(d *database.GormDB) gin.HandlerFunc {
 	}
 }
 
-// authenticate stores the user in the context for unified access from the API.
+// authenticateUser stores the user in the context for unified access from the API.
 // Abord if the user is unauthorized, i.e. is not in the database,
 // or if the authentication is missing.
 func authenticateUser(d *database.GormDB) gin.HandlerFunc {
@@ -100,13 +106,13 @@ func authenticateUser(d *database.GormDB) gin.HandlerFunc {
 			return
 		}
 
-		user, err := d.GetUser(username, password)
+		user, err := d.GetUser(username)
 		if err != nil {
 			res := Response{Status: http.StatusInternalServerError, Message: err.Error()}
 			c.JSON(res.Status, res)
 			c.Abort()
 			return
-		} else if user == nil {
+		} else if user == nil || user.Password != password {
 			res := Response{Status: http.StatusUnauthorized, Message: UNAUTHORIZED_MESSAGE}
 			c.JSON(res.Status, res)
 			c.Abort()
@@ -162,9 +168,9 @@ func admin() gin.HandlerFunc {
 	}
 }
 
-// tokenOwnerOrAdmin abord if the token stored in the conext has not been
-// created by the user in the context, except if he is an admin.
-func tokenOwnerOrAdmin() gin.HandlerFunc {
+// tokenOwner abord if the token stored in the conext has not been
+// created by the user in the context.
+func tokenOwner() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userInterface, ok := c.Get("user")
 		if !ok {
@@ -178,13 +184,45 @@ func tokenOwnerOrAdmin() gin.HandlerFunc {
 		}
 		token := tokenInterface.(*model.Token)
 
-		if token.UserID != user.ID && !user.Admin {
+		if token.CreatedByID != user.ID {
 			res := Response{Status: http.StatusUnauthorized, Message: UNAUTHORIZED_MESSAGE}
 			c.JSON(res.Status, res)
 			c.Abort()
 			return
 		}
 
+		c.Next()
+	}
+}
+
+// authenticateUsername stores the user of the username in the query
+// in the contextfor unified access from the API.
+// Abord if the username is invalid, i.e. is not in the database
+func authenticateUsername(d *database.GormDB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		username := c.Param("username")
+
+		if username == "" {
+			res := Response{Status: http.StatusBadRequest, Message: BAD_REQUEST_MESSAGE}
+			c.JSON(res.Status, res)
+			c.Abort()
+			return
+		}
+
+		user, err := d.GetUser(username)
+		if err != nil {
+			res := Response{Status: http.StatusInternalServerError, Message: err.Error()}
+			c.JSON(res.Status, res)
+			c.Abort()
+			return
+		} else if user == nil {
+			res := Response{Status: http.StatusUnauthorized, Message: INVALID_TOKEN_MESSAGE}
+			c.JSON(res.Status, res)
+			c.Abort()
+			return
+		}
+
+		c.Set("user", user)
 		c.Next()
 	}
 }

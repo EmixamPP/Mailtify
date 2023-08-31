@@ -30,9 +30,9 @@ func (d *GormDB) GetUsers() ([]model.User, error) {
 // GetUser checks if an user is in the database,
 // returns the user model if so, otherwise nil.
 // nil and an error is returned if a problem has occurred.
-func (d *GormDB) GetUser(username, password string) (*model.User, error) {
+func (d *GormDB) GetUser(username string) (*model.User, error) {
 	var user model.User
-	if err := d.db.Model(&user).Where("username = ? AND password = ?", username, password).First(&user).Error; err != nil {
+	if err := d.db.Model(&user).Where("username = ?", username).First(&user).Error; err != nil {
 		if gorm.IsRecordNotFoundError(err) {
 			return nil, nil
 		}
